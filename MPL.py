@@ -50,7 +50,7 @@ def mpl():
     for item in query_list:
         if item[0] is True:
             otc_sheet['A' + str(otc_row)].value = item[2]
-            otc_sheet['B' + str(otc_row)].value = item[2]
+            otc_sheet['B' + str(otc_row)].value = item[2] + ': ' + item[1] + ' ' + item[3] # Sample Description
             otc_sheet['M' + str(otc_row)].value = item[2]
             otc_sheet['p' + str(otc_row)].value = item[2]
             otc_sheet['R' + str(otc_row)].value = item[2]
