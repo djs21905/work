@@ -1,8 +1,16 @@
 import psycopg2
 import time
+import openpyxl
 
+# Add PO  # QC LAB at the end
+# make it so you cant add over a certain number
+# when finished an email is sent automatically to MPL
 
 def mpl():
+    otc = openpyxl.load_workbook('otcmpl.xlsx')
+    otc_sheet = otc.get_sheet_by_name('Sheet1')
+    non_otc = openpyxl.load_workbook('nonotcmpl.xlsx')
+    non_otc_sheet = non_otc.get_sheet_by_name('Sheet1')
     cursor = conn.cursor()
     # Creates a list of batch numbers to be sent for micro
     list_of_batch_numbers = []
@@ -15,11 +23,10 @@ def mpl():
             break
         else:
             continue
-    otc_batches = []
-    non_otc_batches = []
 
     # Execute the query --> assign it to a variable using fetchone
     # Fetch one returns a tuple so we select the item at index 0
+    query_list = []
     for batch in list_of_batch_numbers:
         try:
             cursor.execute("""SELECT products.otc, company.company_code, products.formula_number, products.product_name
@@ -31,22 +38,40 @@ def mpl():
                         JOIN planners
                              ON company.planner_name = planners.planner_name
                             WHERE batch_number = (%s)""", (batch,))
-            otc_bool = cursor.fetchone()
-            final_string = otc_bool[2] + ': ' + otc_bool[1] + ' ' + otc_bool[3] + ' B ' + batch + ' DOM ' + initials.upper()+' '+time.strftime("%m-%d-%Y")
-            if otc_bool[0] is True:
-                otc_batches.append(final_string)
-            else:
-                non_otc_batches.append(final_string)
+            query_results = cursor.fetchone()
+            if len(query_results) > 1:
+                query_list.append(query_results)
         except:
-            print('batch # not in database')
-    return otc_batches, non_otc_batches
+            pass
+
+    today = time.strftime("%m-%d-%Y")
+    otc_row = 9
+    non_otc_row = 8
+    for item in query_list:
+        if item[0] is True:
+            otc_sheet['A' + str(otc_row)].value = item[2]
+            otc_sheet['B' + str(otc_row)].value = item[2]
+            otc_sheet['M' + str(otc_row)].value = item[2]
+            otc_sheet['p' + str(otc_row)].value = item[2]
+            otc_sheet['R' + str(otc_row)].value = item[2]
+            otc_sheet['T' + str(otc_row)].value = item[2]
+            otc_sheet['U' + str(otc_row)].value = item[2]
+            otc_row += 1
+        else:
+            non_otc_sheet['A' + str(non_otc_row)].value = item[2]
+            non_otc_row += 1
+
+    otc.save('MPL OTC ' + today + '.xlsx')
+    non_otc.save('nonotctest.xlsx')
 
 
 try:
     conn = psycopg2.connect("dbname='work' host='localhost' password=''")
     print('You successfully connected to the Bentley Labs QC Database.')
     print('-----------------------------------------------------------')
-except Exception as rofl:
-    print(rofl)
+except Exception as error:
+    print(error)
 
-print(mpl())
+mpl()
+
+
