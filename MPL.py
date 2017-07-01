@@ -85,9 +85,12 @@ def mpl():
 
     non_otc_sheet['B' + str(non_otc_row)].value = 'PO # QC LAB'
 
+    otcfn = 'MPL OTC ' + today + '.xlsx'
+    nonotcfn = 'MPL NON OTC' + today + '.xlsx'
+    otc.save(otcfn)
+    non_otc.save(nonotcfn)
 
-    otc.save('MPL OTC ' + today + '.xlsx')
-    non_otc.save('MPL NON OTC' + today + '.xlsx')
+    return otcfn, nonotcfn
 
 
 try:
@@ -101,3 +104,4 @@ mpl()
 
 
 
+# Take those files and email them to MPL
