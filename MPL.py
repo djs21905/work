@@ -71,12 +71,23 @@ def mpl():
 
     otc_sheet['B' + str(otc_row)].value = 'PO # QC LAB'
 
-        # else:
-        #     non_otc_sheet['A' + str(non_otc_row)].value = item[2]
-        #     non_otc_row += 1
+    for item in non_otc_list:
+        print(item)
+        non_otc_sheet['A' + str(non_otc_row)].value = sample_number  # Sample number
+        non_otc_sheet['B' + str(non_otc_row)].value = item[2] + ': ' + item[1] + ' ' + item[3] # Sample Description
+        non_otc_sheet['M' + str(non_otc_row)].value = 'B'  # Type of Sample
+        non_otc_sheet['p' + str(non_otc_row)].value = item[4]  # Batch number
+        non_otc_sheet['R' + str(non_otc_row)].value = item[2]  # Production Date
+        non_otc_sheet['T' + str(non_otc_row)].value = initials.upper()  # Prepared by
+        non_otc_sheet['U' + str(non_otc_row)].value = today  # Date Prepared
+        non_otc_row += 1
+        sample_number +=1
+
+    non_otc_sheet['B' + str(non_otc_row)].value = 'PO # QC LAB'
+
 
     otc.save('MPL OTC ' + today + '.xlsx')
-    # non_otc.save('nonotctest.xlsx')
+    non_otc.save('MPL NON OTC' + today + '.xlsx')
 
 
 try:
@@ -87,7 +98,6 @@ except Exception as error:
     print(error)
 
 mpl()
-
 
 
 
