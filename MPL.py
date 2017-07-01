@@ -26,7 +26,8 @@ def mpl():
 
     # Execute the query --> assign it to a variable using fetchone
     # Fetch one returns a tuple so we select the item at index 0
-    query_list = []
+    otc_query_list = []
+    non_otc_list = []
     for batch in list_of_batch_numbers:
         try:
             cursor.execute("""SELECT products.otc, company.company_code, products.formula_number, products.product_name
@@ -38,31 +39,44 @@ def mpl():
                         JOIN planners
                              ON company.planner_name = planners.planner_name
                             WHERE batch_number = (%s)""", (batch,))
-            query_results = cursor.fetchone()
-            if len(query_results) > 1:
-                query_list.append(query_results)
+            query_results = list(cursor.fetchone())
+            if len(query_results) > 1 and query_results[0] is True:
+                query_results.append(batch)
+                otc_query_list.append(query_results)
+            elif len(query_results) > 1 and query_results[0] is False:
+                query_results.append(batch)
+                non_otc_list.append(query_results)
         except:
             pass
+
+    print(non_otc_list)
+    print(otc_query_list)
 
     today = time.strftime("%m-%d-%Y")
     otc_row = 9
     non_otc_row = 8
-    for item in query_list:
-        if item[0] is True:
-            otc_sheet['A' + str(otc_row)].value = item[2]
-            otc_sheet['B' + str(otc_row)].value = item[2] + ': ' + item[1] + ' ' + item[3] # Sample Description
-            otc_sheet['M' + str(otc_row)].value = item[2]
-            otc_sheet['p' + str(otc_row)].value = item[2]
-            otc_sheet['R' + str(otc_row)].value = item[2]
-            otc_sheet['T' + str(otc_row)].value = item[2]
-            otc_sheet['U' + str(otc_row)].value = item[2]
-            otc_row += 1
-        else:
-            non_otc_sheet['A' + str(non_otc_row)].value = item[2]
-            non_otc_row += 1
+    sample_number = 1
+
+    for item in otc_query_list:
+        print(item)
+        otc_sheet['A' + str(otc_row)].value = sample_number  # Sample number
+        otc_sheet['B' + str(otc_row)].value = item[2] + ': ' + item[1] + ' ' + item[3] # Sample Description
+        otc_sheet['M' + str(otc_row)].value = 'B'  # Type of Sample
+        otc_sheet['p' + str(otc_row)].value = item[4]  # Batch number
+        otc_sheet['R' + str(otc_row)].value = item[2]  # Production Date
+        otc_sheet['T' + str(otc_row)].value = initials.upper()  # Prepared by
+        otc_sheet['U' + str(otc_row)].value = today  # Date Prepared
+        otc_row += 1
+        sample_number +=1
+
+    otc_sheet['B' + str(otc_row)].value = 'PO # QC LAB'
+
+        # else:
+        #     non_otc_sheet['A' + str(non_otc_row)].value = item[2]
+        #     non_otc_row += 1
 
     otc.save('MPL OTC ' + today + '.xlsx')
-    non_otc.save('nonotctest.xlsx')
+    # non_otc.save('nonotctest.xlsx')
 
 
 try:
@@ -73,5 +87,7 @@ except Exception as error:
     print(error)
 
 mpl()
+
+
 
 
