@@ -1,10 +1,9 @@
 import psycopg2
 import time
 import openpyxl
+import smtplib
 
-# Add PO  # QC LAB at the end
-# make it so you cant add over a certain number
-# when finished an email is sent automatically to MPL
+
 
 def mpl():
     otc = openpyxl.load_workbook('otcmpl.xlsx')
@@ -100,8 +99,26 @@ try:
 except Exception as error:
     print(error)
 
-mpl()
+files = mpl()
 
 
 
-# Take those files and email them to MPL
+# Email MPL Files
+server = smtplib.SMTP('smtp.gmail.com:587')
+server.ehlo()
+server.starttls()
+
+my_email = input('Enter your email address:')
+my_pass = input('Enter your email password:')
+
+server.login(my_email, my_pass)
+
+subject = 'MPL EMAIL MESSAGE TEST'
+content = 'message content here'
+
+msg = "Subject:{}\n\n{}".format(subject,content)
+
+server.sendmail(my_email, 'test@gmail.com', msg)
+
+server.close()
+
