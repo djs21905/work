@@ -2,6 +2,10 @@ import psycopg2
 import time
 import openpyxl
 import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
 
 
 
@@ -103,7 +107,24 @@ files = mpl()
 
 
 
-# Email MPL Files
+msg = MIMEMultipart()
+msg['From'] = 'dryolors@gmail.com'
+msg['To'] = 'dryolors@gmail.com'
+msg['Subject'] = "SUBJECT OF THE EMAIL"
+
+body = "TEXT YOU WANT TO SEND"
+msg.attach(MIMEText(body, 'plain'))
+
+filename = files[0]
+attachment = open("MPL NON OTC07-01-2017.xlsx", "rb")
+
+part = MIMEBase('application', 'octet-stream')
+part.set_payload(attachment).read()
+encoders.encode_base64(part)
+part.add_header('Content-Disposition', "attachment; filename= %s" % filename)
+
+msg.attach(part)
+
 server = smtplib.SMTP('smtp.gmail.com:587')
 server.ehlo()
 server.starttls()
@@ -113,12 +134,10 @@ my_pass = input('Enter your email password:')
 
 server.login(my_email, my_pass)
 
-subject = 'MPL EMAIL MESSAGE TEST'
-content = 'message content here'
-
-msg = "Subject:{}\n\n{}".format(subject,content)
-
-server.sendmail(my_email, 'test@gmail.com', msg)
+text = msg.as_string()
+server.sendmail(my_email, 'test@gmail.com', text)
 
 server.close()
+
+
 
